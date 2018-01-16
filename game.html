@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+  body {
+    width: 200px;
+    background: #fff;
+    font-family: helvetica, sans-serif;
+    font-size: 16px;
+  }
+  canvas {
+    background: #eee;
+  }
+  button {
+    border-radius: 4px;
+    padding: 4px;
+    margin: 10px;
+  }
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.2rem;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>25p2b</h1>
+    <div id="score"></div>
+  </div>
+  <canvas class="mb" id="canvas" width="203" height="203"></canvas>
+  <div class="container">
+    <button id="btn_down">down</button>
+    <button id="btn_right">right</button>
+  </div>
+
+  <script>
+  var COLS = 5;
+  var ROWS = 5;
+  var matrix = [];
+  var score = 0;
+  var cur_x = 0, cur_y = 0;
+  var first_x = false, first_y = false;
+
+  /**
+   *-------------------------------------
+   */
+  function draw() {
+    var x, y,
+      c = document.getElementById('canvas'),
+      ctx = c.getContext("2d");
+
+    ctx.lineWidth = 1;
+
+    for (y = 0; y < ROWS; y++) {
+      for (x = 0; x < COLS; x++) {
+        if (matrix[y][x]) {
+          ctx.fillStyle = "#FF0000";
+        }
+        else {
+          ctx.fillStyle = "#FFFFFF";
+        }
+        ctx.fillRect(40*x,40*y,40,40);
+        ctx.strokeStyle="#000000";
+        ctx.strokeRect(40*x,40*y,40,40);
+      }
+    }
+
+    ctx.strokeStyle = "#0000FF";
+    ctx.lineWidth = 6;
+    ctx.strokeRect(40*cur_x+3,3,34,194);
+    ctx.strokeRect(3,40*cur_y+3,194,34);
+
+    document.getElementById('score').innerHTML = score;
+
+    document.getElementById('btn_right').style =
+      first_x ? 'background:red' : 'background:#eee';
+    document.getElementById('btn_down').style =
+      first_y ? 'background:red' : 'background:#eee';
+  }
+
+  function shift_down() {
+    var y;
+
+    for (y = 0; y < ROWS; y++) {
+      if (y == 0) {
+        matrix[ROWS-1][cur_x] = matrix[0][cur_x]
+      }
+      else {
+        matrix[y-1][cur_x] = matrix[y][cur_x]
+      }
+    }
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function cur_down() {
+    cur_y = cur_y + 1;
+    if (cur_y >= ROWS) {
+      cur_y = 0;
+    }
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function btn_down(event) {
+    score++;
+    if (first_y) {
+      shift_down();
+      first_y = false;
+    }
+    else {
+      cur_down();
+      first_x = true;
+    }
+    draw();
+  }
+
+  /**
+   *-------------------------------------
+   */
+   function shift_right() {
+     var x;
+
+     for (x = 0; x < COLS; x++) {
+       if (x == 0) {
+         matrix[cur_y][0] = matrix[cur_y][COLS-1]
+       }
+       else {
+         matrix[cur_y][x] = matrix[cur_x][x-1]
+       }
+     }
+   }
+
+  /**
+   *-------------------------------------
+   */
+  function cur_right() {
+    cur_x = cur_x + 1;
+    if (cur_x >= COLS) {
+      cur_x = 0;
+    }
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function btn_right(event) {
+    score++;
+    if (first_x) {
+      shift_right();
+      first_x = false;
+    }
+    else {
+      cur_right();
+      first_y = true;
+    }
+    draw();
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function setup() {
+    var x, y, row;
+
+    for (y = 0; y < ROWS; y++) {
+      row = [];
+      for (x = 0; x < COLS; x++) {
+        row.push(false);
+      }
+      matrix.push(row);
+      for (x = 0; x < COLS; x++) {
+        matrix[y][x] = Math.random() >= 0.5 ? true : false;
+      }
+    }
+
+    document.getElementById("btn_down").onclick = btn_down;
+
+    document.getElementById("btn_right").onclick = btn_right;
+
+    draw();
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function loop() {
+    draw();
+  }
+
+  setup();
+  //setInterval(loop, 200);
+
+  </script>
+</body>
+</html>
