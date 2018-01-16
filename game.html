@@ -78,7 +78,7 @@
     ctx.strokeRect(40*cur_x+3,3,34,194);
     ctx.strokeRect(3,40*cur_y+3,194,34);
 
-    document.getElementById('score').innerHTML = score;
+    document.getElementById('score').innerHTML = 'Score: ' + score;
 
     document.getElementById('btn_right').style =
       first_x ? 'background:red' : 'background:#eee';
@@ -87,14 +87,18 @@
   }
 
   function shift_down() {
-    var y;
+    var y, last;
 
-    for (y = 0; y < ROWS; y++) {
+    for (y = ROWS-1; y > 0; y--) {
+      if (y == ROWS-1) {
+        last = matrix[y][cur_x];
+      }
+      else
       if (y == 0) {
-        matrix[ROWS-1][cur_x] = matrix[0][cur_x]
+        matrix[0][cur_x] = last;
       }
       else {
-        matrix[y-1][cur_x] = matrix[y][cur_x]
+        matrix[y+1][cur_x] = matrix[y][cur_x];
       }
     }
   }
@@ -129,14 +133,18 @@
    *-------------------------------------
    */
    function shift_right() {
-     var x;
+     var x, last;
 
-     for (x = 0; x < COLS; x++) {
+     for (x = COLS-1; x > 0; x--) {
+       if (x == COLS-1) {
+         last = matrix[cur_y][x];
+       }
+       else
        if (x == 0) {
-         matrix[cur_y][0] = matrix[cur_y][COLS-1]
+         matrix[cur_y][0] = last;
        }
        else {
-         matrix[cur_y][x] = matrix[cur_x][x-1]
+         matrix[cur_y][x+1] = matrix[cur_y][x];
        }
      }
    }
@@ -170,6 +178,20 @@
   /**
    *-------------------------------------
    */
+  function keypress(event) {
+    switch (event.key) {
+      case "ArrowRight":
+        btn_right();
+        break;
+      case "ArrowDown":
+        btn_down();
+        break;
+    }
+  }
+
+  /**
+   *-------------------------------------
+   */
   function setup() {
     var x, y, row;
 
@@ -184,8 +206,8 @@
       }
     }
 
+    document.addEventListener("keypress", keypress);
     document.getElementById("btn_down").onclick = btn_down;
-
     document.getElementById("btn_right").onclick = btn_right;
 
     draw();
