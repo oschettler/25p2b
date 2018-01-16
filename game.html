@@ -129,7 +129,8 @@
    *-------------------------------------
    */
    function shift_right() {
-     matrix[cur_y].push(matrix[cur_y][COL-1]);
+     matrix[cur_y].unshift(matrix[cur_y][COLS-1]);
+     matrix[cur_y].pop();
    }
 
   /**
