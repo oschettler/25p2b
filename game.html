@@ -33,19 +33,24 @@
 <body>
   <div class="container">
     <h1>25p2b</h1>
+    <div id="level"></div>
     <div id="score"></div>
   </div>
   <canvas class="mb" id="canvas" width="203" height="203"></canvas>
   <div class="container">
-    <button id="btn_down">down</button>
-    <button id="btn_right">right</button>
+    <button id="btn_down">&darr;</button>
+    <div id="move"></div>
+    <button id="btn_right">&rarr;</button>
   </div>
 
   <script>
   var COLS = 5;
   var ROWS = 5;
-  var matrix = [];
+  var matrix;
+  var target;
   var score = 0;
+  var move = 0;
+  var level = 2;
   var cur_x = 0, cur_y = 0;
   var first_x = false, first_y = false;
 
@@ -61,7 +66,7 @@
 
     for (y = 0; y < ROWS; y++) {
       for (x = 0; x < COLS; x++) {
-        if (matrix[y][x]) {
+        if (target[y][x]) {
           ctx.fillStyle = "#FF0000";
         }
         else {
@@ -73,12 +78,26 @@
       }
     }
 
+    for (y = 0; y < ROWS; y++) {
+      for (x = 0; x < COLS; x++) {
+        if (matrix[y][x]) {
+          ctx.fillStyle = "#00FF00";
+        }
+        else {
+          ctx.fillStyle = "#FFFFFF";
+        }
+        ctx.fillRect(40*x+19,40*y+19,20,20);
+      }
+    }
+
     ctx.strokeStyle = "#0000FF";
     ctx.lineWidth = 6;
     ctx.strokeRect(40*cur_x+3,3,34,194);
     ctx.strokeRect(3,40*cur_y+3,194,34);
 
-    document.getElementById('score').innerHTML = 'Score: ' + score;
+    document.getElementById('level').innerHTML = 'Lv: ' + level;
+    document.getElementById('move').innerHTML = '#' + move;
+    document.getElementById('score').innerHTML = 'Sc: ' + score;
 
     document.getElementById('btn_right').style =
       first_x ? 'background:red' : 'background:#eee';
@@ -86,6 +105,40 @@
       first_y ? 'background:red' : 'background:#eee';
   }
 
+  /**
+   *-------------------------------------
+   */
+  function equal() {
+    var x, y;
+
+    for (y = 0; y < ROWS; y++) {
+      for (x = 0; x < COLS; x++) {
+        if (matrix[y][x] != target[y][x]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function check() {
+    if (equal()) {
+      score += Math.round(level * 5 / move);
+
+      cur_x = 0;
+      cur_y = 0;
+      level++;
+      move = 0;
+      //console.log("New level " +  level);
+      shuffle();
+      deviate();
+      draw();
+    }
+  }
+
+  /**
+   *-------------------------------------
+   */
   function column_push(ary, x, value) {
     var y;
 
@@ -95,6 +148,9 @@
     matrix[0][x] = value;
   }
 
+  /**
+   *-------------------------------------
+   */
   function shift_down() {
     column_push(matrix, cur_x, matrix[ROWS-1][cur_x]);
   }
@@ -103,9 +159,11 @@
    *-------------------------------------
    */
   function cur_down() {
-    cur_y = cur_y + 1;
-    if (cur_y >= ROWS) {
+    if (cur_y == ROWS - 1) {
       cur_y = 0;
+    }
+    else {
+      cur_y = cur_y + 1;
     }
   }
 
@@ -113,7 +171,7 @@
    *-------------------------------------
    */
   function btn_down(event) {
-    score++;
+    move++;
     if (first_y) {
       shift_down();
       first_y = false;
@@ -123,6 +181,52 @@
       first_x = true;
     }
     draw();
+    check();
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function column_pop(ary, x, value) {
+    var y;
+
+    for (y = 0; y < ROWS-1; y++) {
+      matrix[y][x] = matrix[y+1][x];
+    }
+    matrix[ROWS-1][x] = value;
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function shift_up() {
+    column_pop(matrix, cur_x, matrix[0][cur_x]);
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function cur_up() {
+    if (cur_y == 0) {
+      cur_y = ROWS - 1;
+    }
+    else {
+      cur_y = cur_y - 1;
+    }
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function btn_up(event) {
+    if (first_y) {
+      shift_up();
+      first_y = false;
+    }
+    else {
+      cur_up();
+      first_x = true;
+    }
   }
 
   /**
@@ -137,9 +241,11 @@
    *-------------------------------------
    */
   function cur_right() {
-    cur_x = cur_x + 1;
-    if (cur_x >= COLS) {
+    if (cur_x == COLS - 1) {
       cur_x = 0;
+    }
+    else {
+      cur_x = cur_x + 1;
     }
   }
 
@@ -147,7 +253,7 @@
    *-------------------------------------
    */
   function btn_right(event) {
-    score++;
+    move++;
     if (first_x) {
       shift_right();
       first_x = false;
@@ -157,6 +263,41 @@
       first_y = true;
     }
     draw();
+    check();
+  }
+
+  /**
+   *-------------------------------------
+   */
+   function shift_left() {
+     var first = matrix[cur_y].shift();
+     matrix[cur_y].push(first);
+   }
+
+  /**
+   *-------------------------------------
+   */
+  function cur_left() {
+    if (cur_x == 0) {
+      cur_x = COLS - 1;
+    }
+    else {
+      cur_x = cur_x - 1;
+    }
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function btn_left(event) {
+    if (first_x) {
+      shift_left();
+      first_x = false;
+    }
+    else {
+      cur_left();
+      first_y = true;
+    }
   }
 
   /**
@@ -173,27 +314,73 @@
     }
   }
 
+  function copy(ary) {
+    var i,
+      len = ary.length,
+      result = new Array(len);
+
+    for (i = 0; i < len; i++) {
+      result[i] = ary[i].slice(0);
+    }
+    return result;
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function shuffle() {
+    var x, y, row;
+
+    target = [];
+
+    row = [];
+    for (x = 0; x < COLS; x++) {
+      row.push(false);
+    }
+
+    for (y = 0; y < ROWS; y++) {
+      target.push(row.slice(0));
+      for (x = 0; x < COLS; x++) {
+        target[y][x] = Math.random() >= 0.5 ? true : false;
+      }
+    }
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function deviate() {
+    var lv;
+
+    matrix = copy(target);
+    for (lv = 0; lv < level; lv++) {
+      if (Math.random() >= 0.5) {
+        //console.log('up');
+        btn_up();
+      }
+      else {
+        //console.log('left');
+        btn_left();
+      }
+    }
+  }
+
+  /**
+   *-------------------------------------
+   */
+  function events() {
+    document.addEventListener("keypress", keypress);
+    document.getElementById("btn_down").onclick = btn_down;
+    document.getElementById("btn_right").onclick = btn_right;
+  }
+
   /**
    *-------------------------------------
    */
   function setup() {
-    var x, y, row;
-
-    for (y = 0; y < ROWS; y++) {
-      row = [];
-      for (x = 0; x < COLS; x++) {
-        row.push(false);
-      }
-      matrix.push(row);
-      for (x = 0; x < COLS; x++) {
-        matrix[y][x] = Math.random() >= 0.5 ? true : false;
-      }
-    }
-
-    document.addEventListener("keypress", keypress);
-    document.getElementById("btn_down").onclick = btn_down;
-    document.getElementById("btn_right").onclick = btn_right;
-
+    shuffle();
+    deviate();
+    events();
     draw();
   }
 
