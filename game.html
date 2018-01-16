@@ -86,21 +86,17 @@
       first_y ? 'background:red' : 'background:#eee';
   }
 
-  function shift_down() {
-    var y, last;
+  function column_push(ary, x, value) {
+    var y;
 
-    for (y = ROWS-1; y > 0; y--) {
-      if (y == ROWS-1) {
-        last = matrix[y][cur_x];
-      }
-      else
-      if (y == 0) {
-        matrix[0][cur_x] = last;
-      }
-      else {
-        matrix[y+1][cur_x] = matrix[y][cur_x];
-      }
+    for (y = ROWS-2; y >= 0; y--) {
+      matrix[y+1][x] = matrix[y][x];
     }
+    matrix[0][x] = value;
+  }
+
+  function shift_down() {
+    column_push(matrix, cur_x, matrix[ROWS-1][cur_x]);
   }
 
   /**
@@ -133,20 +129,7 @@
    *-------------------------------------
    */
    function shift_right() {
-     var x, last;
-
-     for (x = COLS-1; x > 0; x--) {
-       if (x == COLS-1) {
-         last = matrix[cur_y][x];
-       }
-       else
-       if (x == 0) {
-         matrix[cur_y][0] = last;
-       }
-       else {
-         matrix[cur_y][x+1] = matrix[cur_y][x];
-       }
-     }
+     matrix[cur_y].push(matrix[cur_y][COL-1]);
    }
 
   /**
