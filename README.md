@@ -2,6 +2,11 @@
 
 ![Screenshot](25p2b.jpg)
 
+## Links
+
+* [Background Story](https://schettler.net/projekte/spiel-25p2b/)
+* [Playable game](https://schettler.net/25p2b.html)
+
 ## How to play
 
 On start, a random pattern is chosen as target state, shown by the red squares.
