@@ -1,5 +1,7 @@
 # Game of 25p2b
 
+![Screenshot](25p2b.jpg)
+
 ## How to play
 
 On start, a random pattern is chosen as target state, shown by the red squares.
